@@ -1,21 +1,10 @@
-const { Pool, Client } = require("pg");
-const app = require("./app");
 const path = require("path");
-
-// setting up environment variables.
 require("dotenv").config({
   override: true,
   path: path.join(__dirname, "dev.env"),
 });
-
-// postgres pool setup.
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+const app = require("./app");
+const pool = require("./config/db");
 
 // db test connection.
 (async () => {
@@ -35,3 +24,9 @@ const pool = new Pool({
 app.listen(process.env.PORT, () => {
   console.log(`App is running at ${process.env.PORT}`);
 });
+
+// Create tables if not exists
+require("./config/createTable").createUsersTable();
+
+// routes setup.
+app.use("/api/v1/users", require("./routes/userRoutes"));

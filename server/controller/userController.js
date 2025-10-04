@@ -2,6 +2,7 @@ const {
   createUserService,
   getAllUsersService,
   getUserByIdService,
+  getUserByEmailService,
   updateUserByIdService,
   deleteUserByIdService,
 } = require("../models/users");
@@ -100,10 +101,30 @@ const deleteUserById = async (req, res, next) => {
   }
 };
 
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    if (!email || !password)
+      return handleResponse(res, 400, "Email and password are required");
+    const user = await getUserByEmailService(email);
+    if (!user) return handleResponse(res, 401, "Invalid credentials");
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return handleResponse(res, 401, "Invalid credentials");
+
+    // create a copy without the password field
+    const safeUser = { ...user };
+    delete safeUser.password;
+    handleResponse(res, 200, "Login successful", safeUser);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
   getUserById,
   updateUserById,
   deleteUserById,
+  login,
 };

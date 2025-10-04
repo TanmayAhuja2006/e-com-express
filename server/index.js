@@ -27,6 +27,8 @@ app.listen(process.env.PORT, () => {
 
 // Create tables if not exists
 require("./config/createTable").createUsersTable();
+require("./config/createTable").createProductsCategoryTable();
 
 // routes setup.
 app.use("/api/v1/users", require("./routes/userRoutes"));
+app.use("/api/v1/products", require("./routes/productRoutes"));

@@ -14,7 +14,6 @@ const createUsersTable = async () => {
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )`;
   try {
-    // remove any previous confirmPassword column (handles both unquoted lowercase and quoted mixed-case)
     await pool.query(`DO $$
       BEGIN
         IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='confirmpassword') THEN
@@ -33,4 +32,20 @@ const createUsersTable = async () => {
   }
 };
 
-module.exports = { createUsersTable };
+const createProductsCategoryTable = async () => {
+  const queryText = `CREATE TABLE IF NOT EXISTS product_categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`;
+  try {
+    await pool.query(queryText);
+    console.log("Product categories table created successfully");
+  } catch (err) {
+    console.error("Error creating product categories table", err);
+  }
+};
+
+module.exports = { createUsersTable, createProductsCategoryTable };

@@ -10,6 +10,13 @@ const getUserByIdService = async (id) => {
   return response.rows[0];
 };
 
+const getUserByEmailService = async (email) => {
+  const response = await pool.query("SELECT * FROM users WHERE email=$1", [
+    email,
+  ]);
+  return response.rows[0];
+};
+
 const createUserService = async (
   firstName,
   lastName,
@@ -49,6 +56,7 @@ const deleteUserByIdService = async (id) => {
 module.exports = {
   getAllUsersService,
   getUserByIdService,
+  getUserByEmailService,
   createUserService,
   updateUserByIdService,
   deleteUserByIdService,

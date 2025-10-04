@@ -6,9 +6,11 @@ const {
   getUserById,
   updateUserById,
   deleteUserById,
+  login,
 } = require("../controller/userController");
 
 router.post("/create-user", createUser);
+router.post("/login", login);
 router.get("/all-users", getAllUsers);
 router.get("/user/:id", getUserById);
 router.put("/update/user/:id", updateUserById);

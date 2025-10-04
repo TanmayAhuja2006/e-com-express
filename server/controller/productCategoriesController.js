@@ -2,6 +2,7 @@ const {
   addCategoryService,
   getAllCategoriesService,
 } = require("../models/categories");
+
 const { handleResponse } = require("../utils");
 
 const addCategory = async (req, res, next) => {

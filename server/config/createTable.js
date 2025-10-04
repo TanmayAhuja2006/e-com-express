@@ -48,4 +48,32 @@ const createProductsCategoryTable = async () => {
   }
 };
 
-module.exports = { createUsersTable, createProductsCategoryTable };
+const createProductsTable = async () => {
+  const queryText = `CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    stock_quantity INT NOT NULL,
+    product_image TEXT,
+    category_id INT REFERENCES product_categories(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+  try {
+    // ensure product_image column exists for existing tables
+    await pool.query(
+      "ALTER TABLE products ADD COLUMN IF NOT EXISTS product_image TEXT"
+    );
+    await pool.query(queryText);
+    console.log("Products table created successfully");
+  } catch (err) {
+    console.error("Error creating products table", err);
+  }
+};
+
+module.exports = {
+  createUsersTable,
+  createProductsCategoryTable,
+  createProductsTable,
+};

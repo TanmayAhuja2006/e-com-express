@@ -15,23 +15,13 @@ const createUserService = async (
   lastName,
   email,
   password,
-  confirmPassword,
   mobileNumber,
   address,
   role
 ) => {
   const response = await pool.query(
-    "INSERT INTO users (firstName, lastName, email, password, confirmPassword, mobileNumber, address, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-    [
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      mobileNumber,
-      address,
-      role,
-    ]
+    "INSERT INTO users (firstName, lastName, email, password, mobileNumber, address, role) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [firstName, lastName, email, password, mobileNumber, address, role]
   );
   return response.rows[0];
 };

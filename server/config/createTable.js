@@ -7,14 +7,25 @@ const createUsersTable = async () => {
     lastName VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    confirmPassword VARCHAR(255) NOT NULL,
     mobileNumber VARCHAR(15),
     address TEXT,
     role VARCHAR(50) DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )`;
   try {
+    // remove any previous confirmPassword column (handles both unquoted lowercase and quoted mixed-case)
+    await pool.query(`DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='confirmpassword') THEN
+          EXECUTE 'ALTER TABLE users DROP COLUMN confirmpassword';
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='confirmPassword') THEN
+          EXECUTE 'ALTER TABLE users DROP COLUMN "confirmPassword"';
+        END IF;
+      END
+      $$;`);
+
     await pool.query(queryText);
     console.log("Users table created successfully");
   } catch (err) {

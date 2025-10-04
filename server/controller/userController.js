@@ -6,6 +6,7 @@ const {
   deleteUserByIdService,
 } = require("../models/users");
 const { handleResponse } = require("../utils");
+const bcrypt = require("bcryptjs");
 
 const createUser = async (req, res, next) => {
   const {
@@ -19,12 +20,20 @@ const createUser = async (req, res, next) => {
     role,
   } = req.body;
   try {
+    // basic validation: passwords must match
+    if (!password || !confirmPassword || password !== confirmPassword) {
+      return handleResponse(res, 400, "Passwords do not match or are missing");
+    }
+
+    // hash the password with bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // do NOT store confirmPassword in DB; pass only hashed password
     const newUser = await createUserService(
       firstName,
       lastName,
       email,
-      password,
-      confirmPassword,
+      hashedPassword,
       mobileNumber,
       address,
       role

@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useDispatch } from "react-redux";
+import { setUser, setLoading, setError } from "../../redux/userSlice"; // adjust path
+import { fetcher } from "../../utils/utils";
 
 export default function Login() {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -11,11 +15,27 @@ export default function Login() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", formData);
-    alert("Login functionality to be implemented");
-};
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+
+    try {
+      const response = await fetcher("/users/login", {
+        method: "POST",
+        body: formData,
+      });
+      const user = response.data;
+      dispatch(setUser(user));
+      localStorage.setItem("user", JSON.stringify(user));
+      alert(response.message);
+    } catch (err) {
+      dispatch(setError(err.message || "Login failed"));
+      alert(err.message || "Login failed");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200 px-4">

@@ -1,12 +1,13 @@
-import React from 'react'
-import AppRouter from './routes/AppRouter'
+import React from "react";
+import AppRouter from "./routes/AppRouter";
+import Layout from "./components/Layout";
 
 const App = () => {
   return (
-    <div>
-      <AppRouter/>
-    </div>
-  )
-}
+    <Layout>
+      <AppRouter />
+    </Layout>
+  );
+};
 
-export default App
+export default App;

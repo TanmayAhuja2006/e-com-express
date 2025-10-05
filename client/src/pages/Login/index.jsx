@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { setUser, setLoading, setError } from "../../redux/userSlice"; // adjust path
 import { fetcher } from "../../utils/utils";
+import { useNavigate } from "react-router-dom";
+import { addToast } from "@heroui/react";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -10,6 +12,7 @@ export default function Login() {
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,10 +31,21 @@ export default function Login() {
       const user = response.data;
       dispatch(setUser(user));
       localStorage.setItem("user", JSON.stringify(user));
-      alert(response.message);
+      // addToast({
+      //   title: "Login Successful",
+      //   description: "Welcome back!",
+      //   color: "success",
+      //   timeout: 3000,
+      // });
+      setFormData({ email: "", password: "" });
+      navigate("/");
     } catch (err) {
       dispatch(setError(err.message || "Login failed"));
-      alert(err.message || "Login failed");
+      // addToast({
+      //   title: "Login Failed",
+      //   description: err.message || "Please check your credentials",
+      //   color: "danger",
+      // });
     } finally {
       dispatch(setLoading(false));
     }

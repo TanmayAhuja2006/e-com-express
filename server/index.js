@@ -29,7 +29,11 @@ app.listen(process.env.PORT, () => {
 require("./config/createTable").createUsersTable();
 require("./config/createTable").createProductsCategoryTable();
 require("./config/createTable").createProductsTable();
+require("./config/createTable").createOrdersTable();
+require("./config/createTable").createOrderItemsTable();
 
 // routes setup.
 app.use("/api/v1/users", require("./routes/userRoutes"));
 app.use("/api/v1/products", require("./routes/productRoutes"));
+app.use("/api/v1/orders", require("./routes/orders"));
+app.use("/api/v1/order-items", require("./routes/orrderItems"));

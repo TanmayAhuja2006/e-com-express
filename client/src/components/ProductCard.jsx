@@ -32,11 +32,11 @@ export default function ProductCard({
 
         <div className="flex items-center gap-2">
           <span className="text-primary font-bold text-lg">
-            ${price.toFixed(2)}
+            ₹{price.toFixed(2)}
           </span>
           {oldPrice && (
             <span className="text-gray-400 line-through text-sm">
-              ${oldPrice.toFixed(2)}
+              ₹{oldPrice.toFixed(2)}
             </span>
           )}
         </div>

@@ -1,9 +1,10 @@
+// ...existing code...
 import React from "react";
 import {
   Toast,
   ToastProvider,
   ToastTitle,
-  ToastDescription,
+  // ToastDescription, // removed — package doesn't export this
 } from "@heroui/react";
 
 export default function CustomToast({
@@ -26,8 +27,11 @@ export default function CustomToast({
         className={className}
       >
         {title && <ToastTitle>{title}</ToastTitle>}
-        {description && <ToastDescription>{description}</ToastDescription>}
+        {description && (
+          <div className="mt-1 text-sm text-current">{description}</div>
+        )}
       </Toast>
     </ToastProvider>
   );
 }
+// ...existing code...

@@ -72,8 +72,45 @@ const createProductsTable = async () => {
   }
 };
 
+const createOrderItemsTable = async () => {
+  const queryText = `CREATE TABLE IF NOT EXISTS order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INT REFERENCES orders(id) ON DELETE CASCADE,
+    product_id INT REFERENCES products(id) ON DELETE CASCADE,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`;
+  try {
+    await pool.query(queryText);
+    console.log("Order items table created successfully");
+  } catch (err) {
+    console.error("Error creating order items table", err);
+  }
+};
+
+const createOrdersTable = async () => {
+  const queryText = `CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`;
+  try {
+    await pool.query(queryText);
+    console.log("Orders table created successfully");
+  } catch (err) {
+    console.error("Error creating orders table", err);
+  }
+};
+
 module.exports = {
   createUsersTable,
   createProductsCategoryTable,
   createProductsTable,
+  createOrderItemsTable,
+  createOrdersTable,
 };

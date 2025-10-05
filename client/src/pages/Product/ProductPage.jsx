@@ -1,102 +1,131 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/react";
 import { useParams } from "react-router-dom";
-import { allProductsData } from "../../utils/utils";
+import { useDispatch } from "react-redux";
 import ProductCard from "../../components/ProductCard";
+import { fetcher } from "../../utils/utils";
+import { addItem } from "../../redux/cartSlice";
 
 export default function ProductPage() {
   const { productId } = useParams();
+  const dispatch = useDispatch();
 
-  const product = allProductsData.find((p) => p.id === parseInt(productId));
-
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!product) return <p className="p-8 text-center">Product not found!</p>;
+  useEffect(() => {
+    async function getProduct() {
+      try {
+        setLoading(true);
+        const response = await fetcher(`/products/product/${productId}`);
+        setProduct(response.data);
+      } catch (err) {
+        setError(err.message || "Failed to load product details");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getProduct();
+  }, [productId]);
+
+  useEffect(() => {
+    async function getRelatedProducts() {
+      try {
+        const response = await fetcher("/products/all-products");
+        setRelatedProducts(
+          response.data.filter((p) => p.id !== parseInt(productId))
+        );
+      } catch (err) {
+        console.error("Failed to load related products:", err);
+      }
+    }
+
+    getRelatedProducts();
+  }, [productId]);
 
   const handleAddToCart = () => {
-    alert(`Added ${quantity} ${product.title}(s) to cart!`);
+    if (!product) return;
+
+    dispatch(
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: parseFloat(product.price),
+        image: product.product_image,
+        quantity,
+      })
+    );
+
+    alert(`${product.name} added to cart! 🛒`);
   };
+
+  if (loading) {
+    return (
+      <p className="p-8 text-center text-gray-500">
+        Loading product details...
+      </p>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <p className="p-8 text-center text-red-500">
+        {error || "Product not found!"}
+      </p>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Product Images */}
         <div className="flex flex-col gap-4">
           <img
-            src={product.image}
-            alt={product.title}
+            src={product.product_image}
+            alt={product.name}
             className="w-full h-96 object-cover rounded-lg shadow-md"
           />
-          {/* Optional thumbnails */}
-          {/* <div className="flex gap-2">
-            {product.thumbnails?.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt={`Thumbnail ${i}`}
-                className="w-20 h-20 object-cover rounded cursor-pointer"
-              />
-            ))}
-          </div> */}
         </div>
-
-        {/* Product Details */}
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-extrabold text-gray-800">
-            {product.title}
+            {product.name}
           </h1>
-
           <div className="flex items-center gap-4">
             <span className="text-2xl font-bold text-primary">
-              ${product.price.toFixed(2)}
+              ₹{parseFloat(product.price).toFixed(2)}
             </span>
-            {product.oldPrice && (
-              <span className="text-gray-400 line-through">
-                ${product.oldPrice.toFixed(2)}
-              </span>
-            )}
           </div>
-
-          {/* Rating */}
-          {product.rating && (
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={
-                    i < product.rating ? "text-yellow-400" : "text-gray-300"
-                  }
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Description */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span
+                key={i}
+                className={i < 4 ? "text-yellow-400" : "text-gray-300"}
+              >
+                ★
+              </span>
+            ))}
+          </div>
           {product.description && (
             <p className="text-gray-600 mt-4">{product.description}</p>
           )}
-
-          {/* Quantity Selector */}
           <div className="flex items-center gap-2 mt-4">
             <button
-              onClick={() => setQuantity(quantity - 1)}
-              disabled={quantity <= 1}
+              onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
               className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
             >
               -
             </button>
             <span className="px-2">{quantity}</span>
             <button
-              onClick={() => setQuantity(quantity + 1)}
+              onClick={() => setQuantity((prev) => prev + 1)}
               className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
             >
               +
             </button>
           </div>
-
-          {/* Add to Cart Button */}
           <Button
             color="primary"
             variant="solid"
@@ -107,24 +136,34 @@ export default function ProductPage() {
           </Button>
         </div>
       </div>
-
-      {/* Related Products */}
       <div className="max-w-6xl mx-auto mt-12">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
           Related Products
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {allProductsData
-            .filter((p) => p.id !== product.id)
-            .slice(0, 4)
-            .map((p) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                onAddToCart={() => alert(`Added ${p.title} to cart!`)}
-                onQuickView={() => alert(`Quick view: ${p.title}`)}
-              />
-            ))}
+          {relatedProducts.slice(0, 4).map((p) => (
+            <ProductCard
+              key={p.id}
+              product={{
+                id: p.id,
+                title: p.name,
+                price: parseFloat(p.price),
+                image: p.product_image,
+              }}
+              onAddToCart={() =>
+                dispatch(
+                  addItem({
+                    id: p.id,
+                    name: p.name,
+                    price: parseFloat(p.price),
+                    image: p.product_image,
+                    quantity: 1,
+                  })
+                )
+              }
+              onQuickView={() => alert(`Quick view: ${p.name}`)}
+            />
+          ))}
         </div>
       </div>
     </div>

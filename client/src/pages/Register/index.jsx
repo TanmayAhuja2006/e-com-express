@@ -35,15 +35,11 @@ export default function Register() {
     dispatch(setLoading(true));
 
     try {
-      // Call create-user API
       const data = await fetcher("/users/create-user", {
         method: "POST",
         body: formData,
       });
-      // Dispatch user to redux
       dispatch(setUser(data));
-
-      // Navigate to home page after successful registration
       navigate("/");
     } catch (err) {
       console.error(err);
